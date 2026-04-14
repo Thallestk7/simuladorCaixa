@@ -477,8 +477,8 @@ function calcSAC(p) {
          mipRate, dfi, taxaAdm,
          amortMensal, amortAnual, mesAnual,
          fixar, fixarVal} = p;
-  const amortBase = R(vf/prazo, 6);
   let saldo = vf;
+  let mesesRestantes = prazo;
   const rows = [];
   let totalPago=0,totalJuros=0,totalTRImpacto=0,totalMIP=0,totalDFI=0,totalAdm=0,totalAmortExtra=0;
 
@@ -487,6 +487,10 @@ function calcSAC(p) {
     const tr = getTR(mes, trModo, trManual);
     const saldoCor = R(saldoAnt*(1+tr), 6);
     const juros    = R(saldoCor*txMes, 2);
+
+    // CORREÇÃO CRUCIAL: No SAC com TR, a amortização é recalculada mensalmente
+    // dividindo o saldo corrigido pelos meses restantes!
+    const amortBase= R(saldoCor/mesesRestantes, 6);
     let amort      = R(Math.min(amortBase, saldoCor), 2);
     const prestBase= R(amort+juros, 2);
 
@@ -520,6 +524,7 @@ function calcSAC(p) {
 
     rows.push({mes,saldoAnt,tr,saldoCor,amort,amortExtra,juros,prestBase,prestFinal,mip,dfi,taxaAdm,encargo,saldoFinal:novoSaldo});
     saldo = novoSaldo;
+    mesesRestantes--;
     if (saldo<=0.01) break;
   }
   return {rows, resumo:{totalPago,totalJuros,totalTRImpacto,totalMIP,totalDFI,totalAdm,totalAmortExtra,parcelas:rows.length}};
