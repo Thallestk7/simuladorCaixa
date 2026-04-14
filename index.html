@@ -99,29 +99,33 @@ tbody tr.extra td{background:#fffde7}
   background: rgba(0,0,0,0.6); z-index: 9999;
   display: flex; justify-content: center; align-items: center;
   opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+  padding: 15px; /* Added padding to prevent touching screen edges */
 }
 .modal-overlay.active {
   opacity: 1; pointer-events: auto;
 }
 .modal-box {
-  background: #fff; width: 90%; max-width: 700px;
-  border-radius: 12px; overflow: hidden;
+  background: #fff; width: 100%; max-width: 700px;
+  border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.2);
   display: flex; flex-direction: column;
   position: relative;
   transform: translateY(20px); transition: transform 0.3s ease;
+  max-height: 90vh; /* Limits height on mobile */
+  overflow-y: auto; /* Enables scrolling inside the modal */
 }
 .modal-overlay.active .modal-box {
   transform: translateY(0);
 }
 .modal-close {
-  position: absolute; top: 15px; right: 15px;
-  width: 30px; height: 30px; border: 1px solid #ddd; border-radius: 50%;
-  background: #fff; color: #555; font-size: 16px; font-weight: bold;
+  position: absolute; top: 12px; right: 12px;
+  width: 34px; height: 34px; border: none; border-radius: 50%;
+  background: #f0f2f5; color: #333; font-size: 24px; line-height: 1;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s; z-index: 10;
+  transition: background 0.2s; z-index: 100;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15); /* Stronger shadow to stand out */
 }
-.modal-close:hover { background: #f0f0f0; }
+.modal-close:hover { background: #e0e4e8; }
 .modal-content {
   display: flex; flex-direction: row;
 }
@@ -164,7 +168,7 @@ tbody tr.extra td{background:#fffde7}
 }
 .modal-right-title {
   color: #0069b4; font-size: 20px; font-weight: 700; font-style: italic;
-  margin-bottom: 20px;
+  margin-bottom: 20px; text-align: center;
 }
 .modal-qr-box {
   width: 220px; height: 220px; border: 1px solid #ddd;
@@ -178,7 +182,10 @@ tbody tr.extra td{background:#fffde7}
 }
 .modal-pix-box {
   background: #e6f0fb; width: 100%; border-radius: 8px; padding: 15px;
+  cursor: pointer; position: relative; transition: background 0.2s;
 }
+.modal-pix-box:hover { background: #d0e4fb; }
+.modal-pix-box:active { transform: scale(0.98); }
 .modal-pix-label { font-size: 11px; color: #555; margin-bottom: 5px; }
 .modal-pix-key {
   font-size: 14px; font-weight: 700; color: #003366;
@@ -190,10 +197,14 @@ tbody tr.extra td{background:#fffde7}
 }
 @media(max-width: 768px){
   .modal-content { flex-direction: column; }
-  .modal-left, .modal-right { padding: 25px; }
+  /* Add extra top padding on mobile so the close button doesn't cover text */
+  .modal-left { padding: 45px 20px 20px 20px; }
+  .modal-right { padding: 25px 20px; border-left: none; border-top: 1px solid #eef2f6; }
   .modal-title { font-size: 22px; }
+  .modal-qr-box { width: 180px; height: 180px; }
+  .modal-icons { gap: 10px; }
+  .modal-icon-circ { width: 40px; height: 40px; font-size: 20px; }
 }
-
 /* ── tr alerta ─────────────────────────────────────── */
 .tr-alerta{background:var(--orange-light);border-left:3px solid var(--orange);padding:8px 10px;border-radius:0 5px 5px 0;font-size:10px;margin-bottom:10px}
 .economia-box{background:var(--green-light);border-left:3px solid var(--green);padding:10px 12px;border-radius:0 6px 6px 0;font-size:11px;margin-bottom:12px}
@@ -250,9 +261,10 @@ tbody tr.extra td{background:#fffde7}
         <div style="font-size: 12px; color: #555; text-align: center; margin-bottom: 10px;">
           Aponte a câmera do seu celular para o QR Code acima
         </div>
-        <div class="modal-pix-box">
-          <div class="modal-pix-label">Chave PIX (copia e cola):</div>
-          <div class="modal-pix-key">thalles_reis@id.uff.br</div>
+        <div class="modal-pix-box" onclick="copiarPix()" title="Clique para copiar">
+          <div class="modal-pix-label">Chave PIX (clique para copiar):</div>
+          <div class="modal-pix-key" id="chavePixTxt">thalles_reis@id.uff.br</div>
+          <div id="pixCopiado" style="display:none; color: #1a7a3a; font-size: 12px; font-weight: 800; margin-top: 8px;">✅ Copiado com sucesso!</div>
         </div>
       </div>
     </div>
@@ -815,6 +827,16 @@ document.getElementById('fixar_check').addEventListener('change',function(){
 // Inicializa
 simular();
 
+
+function copiarPix() {
+  navigator.clipboard.writeText("thalles_reis@id.uff.br").then(() => {
+    const msg = document.getElementById('pixCopiado');
+    msg.style.display = 'block';
+    setTimeout(() => { msg.style.display = 'none'; }, 3000);
+  }).catch(err => {
+    console.error('Erro ao copiar', err);
+  });
+}
 // Modal Logic
 function abrirModal() {
   document.getElementById('donationModal').classList.add('active');
