@@ -494,35 +494,36 @@ function calcSAC(p) {
     let amort      = R(Math.min(amortBase, saldoCor), 2);
     const prestBase= R(amort+juros, 2);
 
-    let amortExtra = 0;
-    if (amortMensal>0) amortExtra += amortMensal;
-    if (amortAnual>0 && mes>=mesAnual && (mes-mesAnual)%12===0) amortExtra += amortAnual;
+    // aportes manuais do usuário (aporte mensal + anual)
+    let amortExtraManual = 0;
+    if (amortMensal>0) amortExtraManual += amortMensal;
+    if (amortAnual>0 && mes>=mesAnual && (mes-mesAnual)%12===0) amortExtraManual += amortAnual;
 
-    // parcela fixa: se prestação calculada < valor fixo, excedente vira amort extra
+    // excedente da parcela fixa (interno — NÃO é aporte do usuário)
     let prestFinal = prestBase;
+    let excessoPF = 0;
     if (fixar && prestBase < fixarVal) {
-      const excesso = fixarVal - prestBase;
-      amortExtra += excesso;
+      excessoPF = fixarVal - prestBase;
       prestFinal = fixarVal;
     }
     if (fixar && prestBase > fixarVal && fixarVal>0) {
-      // bloqueia: parcela calculada já é maior que o fixo no início
       prestFinal = prestBase;
     }
 
+    const amortExtra = amortExtraManual + excessoPF;
     const amortTotal = R(Math.min(amort+amortExtra, saldoCor), 2);
     const novoSaldo  = R(Math.max(0, saldoCor-amortTotal), 2);
 
     const mip = R(saldoCor*(mipRate/100), 2);
     const encargo = R(prestFinal+mip+dfi+taxaAdm, 2);
 
-    totalPago += encargo;
+    totalPago += encargo + amortExtraManual; // encargo + aporte extra do usuário
     totalJuros += juros;
     totalTRImpacto += R(saldoCor-saldoAnt, 2);
     totalMIP += mip; totalDFI += dfi; totalAdm += taxaAdm;
-    totalAmortExtra += amortExtra;
+    totalAmortExtra += amortExtraManual; // apenas aportes manuais
 
-    rows.push({mes,saldoAnt,tr,saldoCor,amort,amortExtra,juros,prestBase,prestFinal,mip,dfi,taxaAdm,encargo,saldoFinal:novoSaldo});
+    rows.push({mes,saldoAnt,tr,saldoCor,amort,amortExtra:amortExtraManual,excessoPF,juros,prestBase,prestFinal,mip,dfi,taxaAdm,encargo,saldoFinal:novoSaldo});
     saldo = novoSaldo;
     mesesRestantes--;
     if (saldo<=0.01) break;
@@ -557,29 +558,32 @@ function calcPRICE(p) {
     let amort   = R(pmt-juros, 2);
     let prestFinal = pmt;
 
-    let amortExtra = 0;
-    if (amortMensal>0) amortExtra += amortMensal;
-    if (amortAnual>0 && mes>=mesAnual && (mes-mesAnual)%12===0) amortExtra += amortAnual;
+    // aportes manuais do usuário (aporte mensal + anual)
+    let amortExtraManual = 0;
+    if (amortMensal>0) amortExtraManual += amortMensal;
+    if (amortAnual>0 && mes>=mesAnual && (mes-mesAnual)%12===0) amortExtraManual += amortAnual;
 
+    // excedente da parcela fixa (interno — NÃO é aporte do usuário)
+    let excessoPF = 0;
     if (fixar && pmt < fixarVal) {
-      const excesso = fixarVal - pmt;
-      amortExtra += excesso;
+      excessoPF = fixarVal - pmt;
       prestFinal = fixarVal;
     }
 
+    const amortExtra = amortExtraManual + excessoPF;
     const amortTotal = R(Math.min(amort+amortExtra, saldoCor), 2);
     const novoSaldo  = R(Math.max(0, saldoCor-amortTotal), 2);
 
     const mip = R(saldoCor*(mipRate/100), 2);
     const encargo = R(prestFinal+mip+dfi+taxaAdm, 2);
 
-    totalPago += encargo;
+    totalPago += encargo + amortExtraManual; // encargo + aporte extra do usuário
     totalJuros += juros;
     totalTRImpacto += R(saldoCor-saldoAnt, 2);
     totalMIP += mip; totalDFI += dfi; totalAdm += taxaAdm;
-    totalAmortExtra += amortExtra;
+    totalAmortExtra += amortExtraManual; // apenas aportes manuais
 
-    rows.push({mes,saldoAnt,tr,saldoCor,amort,amortExtra,juros,prestBase:pmt,prestFinal,mip,dfi,taxaAdm,encargo,saldoFinal:novoSaldo});
+    rows.push({mes,saldoAnt,tr,saldoCor,amort,amortExtra:amortExtraManual,excessoPF,juros,prestBase:pmt,prestFinal,mip,dfi,taxaAdm,encargo,saldoFinal:novoSaldo});
     saldo = novoSaldo;
     mesesRestantes--;
     if (saldo<=0.01) break;
