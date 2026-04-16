@@ -209,49 +209,9 @@ tbody tr.extra td{background:#fffde7}
 .tr-alerta{background:var(--orange-light);border-left:3px solid var(--orange);padding:8px 10px;border-radius:0 5px 5px 0;font-size:10px;margin-bottom:10px}
 .economia-box{background:var(--green-light);border-left:3px solid var(--green);padding:10px 12px;border-radius:0 6px 6px 0;font-size:11px;margin-bottom:12px}
 @media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{position:static;height:auto}.decomp-grid,.comp-grid,.chart-grid{grid-template-columns:1fr}}
-
-/* ── Botão flutuante de doação ─────────────────────────── */
-.btn-doar {
-  position: fixed;
-  top: 14px;
-  right: 16px;
-  z-index: 9998;
-  background: linear-gradient(135deg, #0069b4, #004a8c);
-  color: #fff;
-  border: none;
-  border-radius: 22px;
-  padding: 8px 16px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0,105,180,0.4);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: transform .15s, box-shadow .15s;
-}
-.btn-doar:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,105,180,0.5);
-}
-
-/* ── Contador regressivo no popup ────────────────────────── */
-.modal-timer {
-  font-size: 11px;
-  color: #888;
-  text-align: center;
-  padding: 6px 0 0;
-}
-.modal-timer span {
-  font-weight: 700;
-  color: #0069b4;
-}
-
 </style>
 </head>
 <body>
-
-<button class="btn-doar" onclick="abrirModal()" title="Apoiar o projeto">💙 Apoiar</button>
 
 <!-- MODAL DE DOAÇÃO -->
 <div class="modal-overlay" id="donationModal">
@@ -308,7 +268,6 @@ tbody tr.extra td{background:#fffde7}
         </div>
       </div>
     </div>
-    <div class="modal-timer">Fechando automaticamente em <span id="contadorModal">10</span>s</div>
     <div class="modal-bottom">
       Muito obrigado pelo seu apoio! 💙<br>
       <span style="font-size: 11px; color: #666; font-weight: normal;">Juntos, a gente realiza sonhos. 🏡</span>
@@ -884,37 +843,13 @@ function copiarPix() {
   });
 }
 // Modal Logic
-let _modalTimer = null;
-
 function abrirModal() {
   document.getElementById('donationModal').classList.add('active');
-  iniciarContador();
 }
-
 function fecharModal() {
   document.getElementById('donationModal').classList.remove('active');
-  if (_modalTimer) { clearInterval(_modalTimer); _modalTimer = null; }
-  const el = document.getElementById('contadorModal');
-  if (el) el.textContent = '10';
 }
-
-function iniciarContador() {
-  if (_modalTimer) { clearInterval(_modalTimer); _modalTimer = null; }
-  let seg = 10;
-  const el = document.getElementById('contadorModal');
-  if (el) el.textContent = seg;
-  _modalTimer = setInterval(() => {
-    seg--;
-    if (el) el.textContent = seg;
-    if (seg <= 0) {
-      clearInterval(_modalTimer);
-      _modalTimer = null;
-      fecharModal();
-    }
-  }, 1000);
-}
-
-// Abre o modal 1.5s após carregar a página
+// Show modal after 1.5 seconds of page load
 window.addEventListener('load', () => {
   setTimeout(abrirModal, 1500);
 });
